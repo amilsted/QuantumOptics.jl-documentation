@@ -67,7 +67,7 @@ using QuantumOptics
 basis = SpinBasis(1//2)
 ψ₀ = spindown(basis)
 sx = sigmax(basis)
-const H = LazySum([0.0],[sx])
+const H = LazySum([0.0],(sx,))
 function H_pump(t, psi)
   H.factors[1] = sin(t)
   return H
@@ -93,7 +93,7 @@ sx2 = tensor(one(b1), sigmax(b1))
 # Define coefficients and Hamiltonian
 tspan = [0.0:0.1:10.0;]
 const coeff_funcs = [t->pulse(t,1,0.5),t->(pulse(t,5,1))]
-const H = LazySum([c(tspan[1]) for c∈coeff_funcs],[sx1,sx2])
+const H = LazySum([c(tspan[1]) for c∈coeff_funcs],(sx1,sx2))
 
 # Dynamic function
 function Ht(t,psi)
@@ -107,6 +107,7 @@ psi0 = tensor(spindown(b1), spindown(b1))
 tout, psi_t = timeevolution.schroedinger_dynamic(tspan, psi0, Ht)
 nothing # hide
 ```
+*Note*: When constructing a [`LazySum`](@ref) for time evolution, provide the operators in a `Tuple` for optimal performance. For example, use `LazySum([1.0, 1.0], (sx1,sx2))` rather than `LazySum([1.0, 1.0], [sx1,sx2])`. This allows the compiler to specialize on the operator types.
 
 
 #### Sampling discrete coefficients
